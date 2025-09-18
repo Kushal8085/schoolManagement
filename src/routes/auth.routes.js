@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { checkEmail, createPassword, loginWithPassword,requestOTP,verifyOTP,requestForgotPassword,verifyForgotPasswordOtp,resetForgotPassword } from "../controllers/auth.controllers.js";
+import { checkEmail, createPassword, loginWithPassword,requestOTP,verifyOTP,requestForgotPassword,verifyForgotPasswordOtp,resetForgotPassword, logout } from "../controllers/auth.controllers.js";
+// import {authMiddleware} from '../middleware/auth.middleware.js'
 
 const authRouter = Router();
 
@@ -15,5 +16,9 @@ authRouter.post("/create-password", createPassword);
 authRouter.post("/forgot-password/request", requestForgotPassword);
 authRouter.post("/forgot-password/verify", verifyForgotPasswordOtp);  //reset-token aayega isme bina token paass reset nahi hoga
 authRouter.post("/forgot-password/reset", resetForgotPassword);
+
+authRouter.get("/logout", logout);
+
+// authRouter.get('/current',authMiddleware,getCurrentUser)
 
 export default authRouter;

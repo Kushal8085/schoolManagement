@@ -73,7 +73,7 @@ export const loginWithPassword = async (req, res) => {
     return res.json({
       success: true,
       message: `Login successful as ${user.role} `,
-      role: user.role 
+      role: user.role
     });
 
   } catch (error) {
@@ -217,7 +217,7 @@ export const createPassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    return res.status(200).json({ message: "Password created successfully" });
+    return res.status(200).json({ message: "Password created successfully", role: user.role, success: true });
   } catch (error) {
     console.error("Error in createPassword:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -283,20 +283,20 @@ export const verifyForgotPasswordOtp = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    if (!user.otp || user.otp !== otp || !user.otpExpiry || user.otpExpiry < Date.now()) {
+    if (!user.resetOtp || user.resetOtp !== otp || !user.resetOtpExpiry || user.resetOtpExpiry < Date.now()) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
     }
 
     // Clear OTP fields
-    user.otp = null;
-    user.otpExpiry = null;
+    user.resetOtp = null;
+    user.resetOtpExpiry = null;
     await user.save();
 
     // reset token (JWT)
     const resetToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "10m" } 
+      { expiresIn: "10m" }
     );
 
     // resetToken in  cookie
@@ -357,10 +357,37 @@ export const resetForgotPassword = async (req, res) => {
     //  Clear resetToken cookie
     res.clearCookie("resetToken");
 
-    return res.status(200).json({ success: true, message: "Password reset successful" });
+    return res.status(200).json({ success: true, role: user.role, message: "Password reset successful" });
 
   } catch (error) {
     console.error("Error in resetForgotPassword:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const logout = (req, res) => {
+  console.log('object')
+  try {
+    res.clearCookie("auth_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",  
+      sameSite: "strict",
+    });
+    return res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error in logout:", error);
+    res.status(500).json({ success: false, message: "Server error" });  
+  }
+}
+
+// export const getCurrentUser = async (req, res) => {
+//   try {
+//     const user = req.user
+//     if(!user){
+//       return res.status(400).json({message: "user not found"})
+//     }
+//     return res.status(200).json(user)
+//   } catch (error) {
+//     return res.status(400).json({message: "get current user error"})
+//   }
+// }
