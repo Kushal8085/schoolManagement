@@ -189,7 +189,6 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-
 export const createPassword = async (req, res) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -314,8 +313,6 @@ export const verifyForgotPasswordOtp = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-
 
 // 3. Reset Password
 export const resetForgotPassword = async (req, res) => {
