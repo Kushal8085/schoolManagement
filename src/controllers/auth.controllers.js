@@ -71,6 +71,7 @@ export const loginWithPassword = async (req, res) => {
 
     // Send response
     return res.json({
+      user,
       success: true,
       message: `Login successful as ${user.role} `,
       role: user.role
@@ -216,7 +217,7 @@ export const createPassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    return res.status(200).json({ message: "Password created successfully", role: user.role, success: true });
+    return res.status(200).json({ message: "Password created successfully", role: user.role, success: true, user });
   } catch (error) {
     console.error("Error in createPassword:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -354,7 +355,7 @@ export const resetForgotPassword = async (req, res) => {
     //  Clear resetToken cookie
     res.clearCookie("resetToken");
 
-    return res.status(200).json({ success: true, role: user.role, message: "Password reset successful" });
+    return res.status(200).json({ user, success: true, role: user.role, message: "Password reset successful" });
 
   } catch (error) {
     console.error("Error in resetForgotPassword:", error);
@@ -363,28 +364,41 @@ export const resetForgotPassword = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  console.log('object')
   try {
     res.clearCookie("auth_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",  
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
     return res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("Error in logout:", error);
-    res.status(500).json({ success: false, message: "Server error" });  
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
-// export const getCurrentUser = async (req, res) => {
-//   try {
-//     const user = req.user
-//     if(!user){
-//       return res.status(400).json({message: "user not found"})
-//     }
-//     return res.status(200).json(user)
-//   } catch (error) {
-//     return res.status(400).json({message: "get current user error"})
-//   }
-// }
+export const getCurrentUser = async (req, res) => {
+  try {
+    const auth_token = req.cookies.auth_token;
+    if (!auth_token) {
+      return res.status(401).json({ success: false, message: "Auth token missing" });
+    }
+    let decoded;
+    try {
+      decoded = jwt.verify(auth_token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: "Invalid or expired auth_token" });
+    }
+
+    const user = await User.findById(decoded.id);
+    // const user=req.user
+    console.log(user)
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({ user, role: user.role, success: true, message: 'successfully get current user' })
+  } catch (error) {
+    return res.status(400).json({ message: "get current user error" })
+  }
+}
