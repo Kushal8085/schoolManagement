@@ -53,17 +53,21 @@ const DirectorSchema = new mongoose.Schema({
 
 //  Teacher Schema
 const TeacherSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  zipCode: { type: String, required: true },
   graduation: { type: String, required: true },
   postGraduation: { type: String, default: null },
   mainSubject: { type: String, required: true },
   otherSubjects: { type: [String], default: [] },
+  joiningDate: { type: Date, required: true },
+  experience: { type: String, required: true },
   photo: { type: String, required: true },
   aadharCard: { type: String, required: true },
   tenthMarksheet: { type: String, required: true },   // Cloudinary URL
   twelfthMarksheet: { type: String, required: true }, // Cloudinary URL
   graduationMarksheet: { type: String, required: true },   // Cloudinary URL
   postGraduationMarksheet: { type: String, required: true }, // Cloudinary URL
-  
+
 });
 
 //  Student Schema

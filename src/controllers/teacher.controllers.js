@@ -59,21 +59,52 @@ export const getTeacherById = async (req, res) => {
 
 export const createTeacher = async (req, res) => {
   try {
-    const data = req.body;
+    const { id, name, gender, dob, phone, email, graduation, postGraduation, mainSubject, otherSubjects, joiningDate, experience, address, city, state, zipCode } = req.body;
 
-    // Ensure role is teacher
-    data.role = "teacher";
+    // files uploaded from multer-cloudinary
+    const files = req.files;
 
-    const newTeacher = new Teacher(data);
+    const photo = files?.photo ? files.photo[0].path : null
+    const aadharCard = files?.aadharCard ? files.aadharCard[0].path : null
+    const tenthMarksheet = files?.tenthMarksheet ? files.tenthMarksheet[0].path : null
+    const twelfthMarksheet = files?.twelfthMarksheet ? files.twelfthMarksheet[0].path : null
+    const graduationMarksheet = files?.graduationMarksheet ? files.graduationMarksheet[0].path : null
+    const postGraduationMarksheet = files?.postGraduationMarksheet ? files.postGraduationMarksheet[0].path : null
+
+    const newTeacher = new Teacher({
+      id,
+      name,
+      gender,
+      dob,
+      phone,
+      email,
+      role:"teacher",
+      graduation,
+      postGraduation,
+      mainSubject,
+      otherSubjects: otherSubjects ? otherSubjects.split(",") : [],
+      joiningDate,
+      experience,
+      address,
+      city,
+      state,
+      zipCode,
+      photo,
+      aadharCard,
+      tenthMarksheet,
+      twelfthMarksheet,
+      graduationMarksheet,
+      postGraduationMarksheet
+    });
     await newTeacher.save();
 
     await sendMail(
-        email,
-        "teacher created successfully",
-        `<h3>Dear ${newTeacher.name},</h3>
+      email,
+      "teacher created successfully",
+      `<h3>Dear ${newTeacher.name},</h3>
         <p>welcome. Our team will get back to you soon.</p>`
-      );
-  
+    );
+
 
     res.status(201).json({
       success: true,
@@ -105,11 +136,11 @@ export const updateTeacher = async (req, res) => {
 
 
     await sendMail(
-        email,
-        "Teacher updated successfully",
-        `<h3>teacher ${teacher.name},updated successfully </h3>`
-      );
-  
+      email,
+      "Teacher updated successfully",
+      `<h3>teacher ${teacher.name},updated successfully </h3>`
+    );
+
 
     if (!teacher) {
       return res.status(404).json({
@@ -141,11 +172,11 @@ export const deleteTeacher = async (req, res) => {
     });
 
     await sendMail(
-        email,
-        "Teacher deleted successfully",
-        `<h3>teacher ${teacher.name},deleted successfully</h3>`
-      );
-  
+      email,
+      "Teacher deleted successfully",
+      `<h3>teacher ${teacher.name},deleted successfully</h3>`
+    );
+
 
 
     if (!teacher) {
